@@ -9,7 +9,8 @@ const imagemin = require('gulp-imagemin');
 const imageminPngquant = require('imagemin-pngquant');
 const cache = require('gulp-cache');
 const babel = require('gulp-babel');
-const htmlmin = require ("gulp-htmlmin");
+const htmlmin = require ('gulp-htmlmin');
+const cleanCSS = require('gulp-clean-css');
 
 // gulp.task('name-task', function() {
 // 	gulp.src(source-files)
@@ -43,11 +44,19 @@ gulp.task('cleanCss', function(){
 	}))
 })
 
+gulp.task('babel', () =>
+    gulp.src('src/js/assets/**/*.js')
+        .pipe(babel({
+            presets: ['@babel/env']
+        }))
+        .pipe(gulp.dest('src/js/babel'))
+);
+
 gulp.task('scripts', function(){
-	gulp.src('src/js/assets/*.js')
+	gulp.src('src/js/babel/*.js')
 	.pipe(concat('main.min.js'))
 	.pipe(uglify())
-	.pipe(gulp.dest('src/js'))
+	.pipe(gulp.dest('dist/js'))
 	.pipe(browserSync.reload({
 		stream: true
 	}))
@@ -78,14 +87,6 @@ gulp.task('imagemin', () =>
         .pipe(gulp.dest('dist/images'))
 ));
 
-gulp.task('babel', () =>
-    gulp.src('src/js/assets/**/*.js')
-        .pipe(babel({
-            presets: ['@babel/env']
-        }))
-        .pipe(gulp.dest('src/js/babel'))
-);
-
 gulp.task("minifyHTML", () => {
     return gulp.src('src/*.html')
         .pipe(htmlmin({ collapseWhitespace: true }))
@@ -106,7 +107,7 @@ gulp.task("minify-css", () => {
 
 gulp.task('build', ['sass', 'scripts', 'imagemin', 'minifyHTML', 'minify-css']);
 
-gulp.task('watch', ['browserSync', 'sass', 'scripts', 'cleanCss', "autoprefixer", "babel", "imagemin", "minifyHTML", "minify-css"], function() {
+gulp.task('default', ['browserSync', 'sass', 'scripts', 'cleanCss', "autoprefixer", "babel", "imagemin", "minifyHTML", "minify-css"], function() {
 	gulp.watch('src/scss/**/*.scss', ['sass']);
 	gulp.watch('src/*.html', browserSync.reload);
 	gulp.watch('src/js/**/*.js', ['scripts']);
@@ -116,5 +117,5 @@ gulp.task('watch', ['browserSync', 'sass', 'scripts', 'cleanCss', "autoprefixer"
 	gulp.watch("src/js/assets/**/*.js", ["babel"]);
 	gulp.watch("src/*.html", ["minifyHTML"]);
     gulp.watch("src/css/**/*.css", ["minify-css"]);
-})
+});
 
